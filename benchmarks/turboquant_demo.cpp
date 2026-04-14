@@ -77,36 +77,9 @@ int main() {
                bits, bs, compression, total_mse/N, total_cos/N);
     }
 
+    /
     // ------------------------------------------------------------------
-    // 2. Quantized dot product vs FP32 dot product
-    // ------------------------------------------------------------------
-    printf("\n--- Quantized inner product accuracy (d=128, 4-bit) ---\n");
-    {
-        TurboQuantizer tq(128, 4);
-        int bs = tq.block_size();
-        float dot_err = 0;
-        int N = 5000;
-        std::vector<uint8_t> ba(bs), bb(bs);
-
-        for (int i = 0; i < N; ++i) {
-            auto a = rand_vec(128, rng);
-            auto b = rand_vec(128, rng);
-
-            // FP32 reference dot
-            float ref = 0;
-            for (int j = 0; j < 128; ++j) ref += a[j]*b[j];
-
-            tq.encode(a.data(), ba.data());
-            tq.encode(b.data(), bb.data());
-            float approx = tq.dot(ba.data(), bb.data());
-
-            dot_err += std::abs(approx - ref) / (std::abs(ref) + 1e-6f);
-        }
-        printf("  Mean relative inner-product error: %.4f%%\n", dot_err/N*100);
-    }
-
-    // ------------------------------------------------------------------
-    // 3. KV cache simulation: attention logits
+    // 2. KV cache simulation: attention logits
     // ------------------------------------------------------------------
     printf("\n--- KV cache attention logit accuracy (seq=512, d=128, 4-bit) ---\n");
     {
@@ -145,7 +118,7 @@ int main() {
     }
 
     // ------------------------------------------------------------------
-    // 4. Throughput benchmark
+    // 3. Throughput benchmark
     // ------------------------------------------------------------------
     printf("\n--- Throughput (d=128, 4-bit, 10k encode+decode cycles) ---\n");
     {
@@ -167,7 +140,7 @@ int main() {
     }
 
     // ------------------------------------------------------------------
-    // 5. Codebook inspection
+    // 4. Codebook inspection
     // ------------------------------------------------------------------
     printf("\n--- 3-bit codebook centroids (d=128) ---\n");
     {
